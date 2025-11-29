@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Range Ranks – Handgun Accuracy</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="main-nav" id="mainNav" style="display: none;">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <span class="logo-icon">🎯</span>
+        <span class="logo-text">RANGE RANKS</span>
+      </div>
+      <div class="nav-links">
+        <a href="#" class="nav-link" data-tab="home">Home</a>
+        <a href="#" class="nav-link" data-tab="leaderboard">Leaderboard</a>
+        <a href="#" class="nav-link" data-tab="profile">Profile</a>
+      </div>
+      <button class="nav-cta" id="navTryFreeBtn">Try for Free</button>
+    </div>
+  </nav>
+
+  <!-- Hero Section (Home Page) -->
+  <div class="hero-section" id="heroSection">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1 class="hero-title">ACCURACY</h1>
+      <h2 class="hero-subtitle">MADE EASY</h2>
+      <p class="hero-description">
+        Live leaderboards for shooting sessions, drills, or weekend competition with friends. 
+        100% free for shooters and range organizers.
+      </p>
+      <div class="hero-buttons">
+        <button class="hero-btn primary" id="heroTryFreeBtn">Try for Free</button>
+        <button class="hero-btn secondary" id="heroLearnMoreBtn">Learn More</button>
+      </div>
+      <p class="hero-footer">Ready to improve your shooting accuracy?</p>
+    </div>
+  </div>
+
+  <div class="app" id="mainApp" style="display: none;">
+    <!-- Tab Navigation -->
+    <div class="tabs-container" id="tabsContainer">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="home" id="homeTab">
+          <span>🏠</span> Home
+        </button>
+        <button class="tab-btn" data-tab="profile" id="profileTab">
+          <span>👤</span> Profile
+        </button>
+        <button class="tab-btn" data-tab="leaderboard" id="leaderboardTab">
+          <span>🏆</span> Leaderboard
+        </button>
+      </div>
+    </div>
+
+    <div id="appContent" style="display: none;">
+      <!-- Content will be rendered by app.js -->
+      <div class="card">
+        <p>Loading...</p>
+      </div>
+    </div>
+
+    <!-- Home Tab Content -->
+    <div class="tab-content" id="homeTabContent" style="display: none;">
+      <div class="row" id="mainContent">
+        <!-- Feed -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Feed</h2>
+            <span class="small" id="feedSubtitle">Activity from users you follow</span>
+          </div>
+          <div id="feedContent">
+            <!-- Rendered by app.js -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Tab Content -->
+    <div class="tab-content" id="profileTabContent" style="display: none;">
+      <div id="profileContent">
+        <!-- Rendered by app.js -->
+      </div>
+    </div>
+
+    <!-- Leaderboard Tab Content -->
+    <div class="tab-content" id="leaderboardTabContent" style="display: none;">
+      <!-- Leaderboard -->
+      <div class="card" id="leaderboardCard">
+        <div class="card-header">
+          <h2>Leaderboard</h2>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Shooter</th>
+              <th>Rank</th>
+              <th>XP</th>
+              <th>Sessions</th>
+              <th>Follow</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboardBody">
+            <!-- populated by app.js -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Details for selected shooter -->
+      <div class="card" id="selectedCard">
+        <div class="card-header">
+          <h2>Selected Shooter</h2>
+          <span class="small" id="selectedDetailsSubtitle">Click a user in the leaderboard</span>
+        </div>
+        <div id="selectedDetailsContent">
+          <!-- JS fills this in -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Log Session (shown on Home and Profile tabs) -->
+    <div class="row" id="sessionContent" style="display: none;">
+      <div class="card col">
+        <div class="card-header">
+          <h2>Log Session</h2>
+        </div>
+        <label for="drillSelect">Drill</label>
+        <select id="drillSelect"></select>
+
+        <label for="shots">Shots taken</label>
+        <input id="shots" type="number" min="1" placeholder="e.g. 10" />
+
+        <label for="hits">Hits on target</label>
+        <input id="hits" type="number" min="0" placeholder="e.g. 9" />
+
+        <button class="btn-primary" id="logSessionBtn">Log Session</button>
+        <p class="small" id="logSessionMsg"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auth Modal will be injected by AuthModal component -->
+  
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Range Ranks – Handgun Accuracy</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      margin: 0;
+      padding: 20px;
+    }
+    h1, h2, h3 {
+      margin-top: 0;
+    }
+    .app {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    .card {
+      background: #020617;
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      border: 1px solid #1f2937;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: #1d4ed8;
+      color: #e5e7eb;
+    }
+    label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #4b5563;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 1px #2563eb;
+    }
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 18px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn-primary {
+      background: #2563eb;
+      color: #e5e7eb;
+    }
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+    .btn-secondary {
+      background: #111827;
+      color: #e5e7eb;
+      border: 1px solid #4b5563;
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .col {
+      flex: 1 1 260px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th, td {
+      padding: 8px;
+      border-bottom: 1px solid #1f2937;
+      text-align: left;
+    }
+    th {
+      font-weight: 600;
+      color: #9ca3af;
+    }
+    .xp-bar {
+      position: relative;
+      height: 12px;
+      border-radius: 999px;
+      background: #111827;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+    .xp-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      background: linear-gradient(to right, #22c55e, #16a34a);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .small {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    .btn-follow {
+      background: #2563eb;
+      color: #e5e7eb;
+      padding: 6px 14px;
+      font-size: 12px;
+    }
+    .btn-follow:hover {
+      background: #1d4ed8;
+    }
+    .btn-following {
+      background: #111827;
+      color: #9ca3af;
+      border: 1px solid #4b5563;
+      padding: 6px 14px;
+      font-size: 12px;
+    }
+    .btn-following:hover {
+      background: #1f2937;
+      color: #e5e7eb;
+    }
+    .follow-stats {
+      display: flex;
+      gap: 16px;
+      margin: 12px 0;
+    }
+    .follow-stat {
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+    .follow-stat:hover {
+      background: #1f2937;
+    }
+    .follow-stat strong {
+      display: block;
+      font-size: 18px;
+      color: #e5e7eb;
+    }
+    .follow-stat span {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    .feed-item {
+      padding: 12px;
+      border-bottom: 1px solid #1f2937;
+    }
+    .feed-item:last-child {
+      border-bottom: none;
+    }
+    .feed-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .feed-item-user {
+      font-weight: 600;
+      color: #e5e7eb;
+    }
+    .feed-item-time {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    .current-user-badge {
+      background: #059669;
+      color: #e5e7eb;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      margin-left: 8px;
+    }
+    @media (max-width: 640px) {
+      .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="card">
+      <div class="card-header">
+        <h1>Range Ranks</h1>
+        <span class="badge">Handgun Accuracy (Friends Only)</span>
+      </div>
+      <p class="small">
+        Add shooters, log handgun drills, earn XP, and climb the ladder from Recruit to Legend.
+        Data is stored locally in your browser.
+      </p>
+    </div>
+
+    <div class="row">
+      <!-- Add Shooter -->
+      <div class="card col">
+        <div class="card-header">
+          <h2>Add Shooter</h2>
+        </div>
+        <label for="shooterName">Shooter name</label>
+<input id="shooterName" type="text" placeholder="John Doe" />
+        <button class="btn-primary" id="addShooterBtn">Add Shooter</button>
+        <p class="small" id="addShooterMsg"></p>
+      </div>
+
+      <!-- Log Session -->
+      <div class="card col">
+        <div class="card-header">
+          <h2>Log Session</h2>
+        </div>
+        <label for="shooterSelect">Shooter</label>
+        <select id="shooterSelect"></select>
+
+        <label for="drillSelect">Drill</label>
+        <select id="drillSelect"></select>
+
+        <label for="shots">Shots taken</label>
+        <input id="shots" type="number" min="1" placeholder="e.g. 10" />
+
+        <label for="hits">Hits on target</label>
+        <input id="hits" type="number" min="0" placeholder="e.g. 9" />
+
+        <button class="btn-primary" id="logSessionBtn">Log Session</button>
+        <p class="small" id="logSessionMsg"></p>
+      </div>
+    </div>
+
+    <!-- Current User Profile -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Your Profile</h2>
+        <button class="btn-secondary" id="setCurrentUserBtn">Set as Current User</button>
+      </div>
+      <div id="currentUserContent">
+        <p class="small" id="currentUserMsg">Select a shooter and click "Set as Current User" to enable following features.</p>
+      </div>
+    </div>
+
+    <!-- Feed -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Feed</h2>
+        <span class="small" id="feedSubtitle">Activity from users you follow</span>
+      </div>
+      <div id="feedContent">
+        <p class="small">Follow users to see their activity here.</p>
+      </div>
+    </div>
+
+    <!-- Leaderboard -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Leaderboard</h2>
+        <button class="btn-secondary" id="resetDataBtn">Reset All Data</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Shooter</th>
+            <th>Rank</th>
+            <th>XP</th>
+            <th>Sessions</th>
+            <th>Follow</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboardBody">
+          <!-- populated by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Details for selected shooter -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Selected Shooter</h2>
+        <span class="small" id="selectedDetailsSubtitle">Pick a shooter above by logging a session.</span>
+      </div>
+      <div id="selectedDetailsContent">
+        <!-- JS fills this in -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---- Config ----
+    const RANKS = [
+      { name: "Recruit", minXP: 0 },
+      { name: "Shooter", minXP: 200 },
+      { name: "Marksman", minXP: 500 },
+      { name: "Sharpshooter", minXP: 1000 },
+      { name: "Expert", minXP: 2000 },
+      { name: "Master", minXP: 3500 },
+      { name: "Legend", minXP: 5000 },
+    ];
+
+    const DRILLS = [
+      { id: "basic7", name: "Basic 7 – 10 shots @ 7 yards", defaultShots: 10, difficulty: 1.0, distance: 7 },
+      { id: "standard10", name: "Standard 10 – 10 shots @ 10 yards", defaultShots: 10, difficulty: 1.3, distance: 10 },
+      { id: "precision15", name: "Precision 15 – 5 shots @ 15 yards", defaultShots: 5, difficulty: 1.7, distance: 15 },
+    ];
+
+    const STORAGE_KEY = "range_ranks_data_v1";
+    const CURRENT_USER_KEY = "range_ranks_current_user_v1";
+    const FOLLOWS_KEY = "range_ranks_follows_v1";
+
+    let shooters = [];
+    let selectedShooterId = null;
+    let currentUserId = null;
+    let follows = {}; // { userId: [array of user IDs they follow] }
+
+    // ---- Utility Functions ----
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(shooters));
+      if (currentUserId) {
+        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(currentUserId));
+      }
+      localStorage.setItem(FOLLOWS_KEY, JSON.stringify(follows));
+    }
+
+    function loadData() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        shooters = [];
+      } else {
+        try {
+          shooters = JSON.parse(raw) || [];
+        } catch {
+          shooters = [];
+        }
+      }
+      
+      // Load current user
+      const currentUserRaw = localStorage.getItem(CURRENT_USER_KEY);
+      if (currentUserRaw) {
+        try {
+          currentUserId = JSON.parse(currentUserRaw);
+        } catch {
+          currentUserId = null;
+        }
+      }
+      
+      // Load follows data
+      const followsRaw = localStorage.getItem(FOLLOWS_KEY);
+      if (followsRaw) {
+        try {
+          follows = JSON.parse(followsRaw) || {};
+        } catch {
+          follows = {};
+        }
+      }
+      
+      // Initialize follow arrays for existing shooters
+      shooters.forEach(shooter => {
+        if (!shooter.following) shooter.following = [];
+        if (!shooter.followers) shooter.followers = [];
+      });
+    }
+
+    function createId() {
+      return Math.random().toString(36).slice(2) + Date.now().toString(36);
+    }
+
+    function getRankForXP(xp) {
+      let current = RANKS[0];
+      for (const r of RANKS) {
+        if (xp >= r.minXP) current = r;
+      }
+      return current;
+    }
+
+    function calculateXP(drillId, hits, shots) {
+      const drill = DRILLS.find(d => d.id === drillId);
+      if (!drill || shots <= 0) return 0;
+      const accuracy = Math.max(0, Math.min(1, hits / shots));
+      const baseXP = 10;
+      const xp = Math.round((accuracy * 50 * drill.difficulty) + baseXP);
+      return xp;
+    }
+
+    function getDrillById(id) {
+      return DRILLS.find(d => d.id === id);
+    }
+
+    // ---- UI Rendering ----
+    function renderShooterSelect() {
+      const select = document.getElementById("shooterSelect");
+      select.innerHTML = "";
+      if (shooters.length === 0) {
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "Add a shooter first";
+        select.appendChild(opt);
+        return;
+      }
+      shooters.forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = s.id;
+        opt.textContent = s.name;
+        select.appendChild(opt);
+      });
+
+      if (!selectedShooterId && shooters.length > 0) {
+        selectedShooterId = shooters[0].id;
+      }
+      select.value = selectedShooterId || shooters[0].id;
+    }
+
+    function renderDrillSelect() {
+      const select = document.getElementById("drillSelect");
+      select.innerHTML = "";
+      DRILLS.forEach(d => {
+        const opt = document.createElement("option");
+        opt.value = d.id;
+        opt.textContent = d.name;
+        select.appendChild(opt);
+      });
+      select.value = DRILLS[0].id;
+      // set default shots
+      document.getElementById("shots").value = DRILLS[0].defaultShots;
+    }
+
+    function isFollowing(userId, targetId) {
+      if (!userId || !targetId || userId === targetId) return false;
+      const userFollows = follows[userId] || [];
+      return userFollows.includes(targetId);
+    }
+
+    function toggleFollow(targetUserId) {
+      if (!currentUserId) {
+        alert("Please set a current user first.");
+        return;
+      }
+      if (currentUserId === targetUserId) {
+        alert("You cannot follow yourself.");
+        return;
+      }
+      
+      if (!follows[currentUserId]) {
+        follows[currentUserId] = [];
+      }
+      
+      const isCurrentlyFollowing = isFollowing(currentUserId, targetUserId);
+      
+      if (isCurrentlyFollowing) {
+        // Unfollow
+        follows[currentUserId] = follows[currentUserId].filter(id => id !== targetUserId);
+        const target = shooters.find(s => s.id === targetUserId);
+        if (target && target.followers) {
+          target.followers = target.followers.filter(id => id !== currentUserId);
+        }
+      } else {
+        // Follow
+        follows[currentUserId].push(targetUserId);
+        const target = shooters.find(s => s.id === targetUserId);
+        if (target) {
+          if (!target.followers) target.followers = [];
+          if (!target.followers.includes(currentUserId)) {
+            target.followers.push(currentUserId);
+          }
+        }
+      }
+      
+      saveData();
+      renderLeaderboard();
+      renderSelectedShooter();
+      renderCurrentUser();
+      renderFeed();
+    }
+
+    function renderLeaderboard() {
+      const tbody = document.getElementById("leaderboardBody");
+      tbody.innerHTML = "";
+      if (shooters.length === 0) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+        cell.colSpan = 6;
+        cell.textContent = "No shooters yet. Add one to get started.";
+        row.appendChild(cell);
+        tbody.appendChild(row);
+        return;
+      }
+
+      const sorted = [...shooters].sort((a, b) => b.xp - a.xp);
+      sorted.forEach((s, index) => {
+        const tr = document.createElement("tr");
+        const rank = getRankForXP(s.xp);
+
+        const posTd = document.createElement("td");
+        posTd.textContent = index + 1;
+
+        const nameTd = document.createElement("td");
+        nameTd.textContent = s.name;
+        if (s.id === currentUserId) {
+          nameTd.innerHTML = `${s.name} <span class="current-user-badge">You</span>`;
+        }
+
+        const rankTd = document.createElement("td");
+        rankTd.textContent = rank.name;
+
+        const xpTd = document.createElement("td");
+        xpTd.textContent = s.xp;
+
+        const sessionsTd = document.createElement("td");
+        sessionsTd.textContent = s.sessions.length;
+
+        const followTd = document.createElement("td");
+        if (currentUserId && currentUserId !== s.id) {
+          const followBtn = document.createElement("button");
+          const isFollowingUser = isFollowing(currentUserId, s.id);
+          followBtn.className = isFollowingUser ? "btn-following" : "btn-follow";
+          followBtn.textContent = isFollowingUser ? "Following" : "Follow";
+          followBtn.onclick = (e) => {
+            e.stopPropagation();
+            toggleFollow(s.id);
+          };
+          followTd.appendChild(followBtn);
+        } else {
+          followTd.textContent = "-";
+        }
+
+        tr.appendChild(posTd);
+        tr.appendChild(nameTd);
+        tr.appendChild(rankTd);
+        tr.appendChild(xpTd);
+        tr.appendChild(sessionsTd);
+        tr.appendChild(followTd);
+
+        tr.style.cursor = "pointer";
+        tr.onclick = () => {
+          selectedShooterId = s.id;
+          renderSelectedShooter();
+          renderShooterSelect();
+        };
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderSelectedShooter() {
+      const container = document.getElementById("selectedDetailsContent");
+      const subtitle = document.getElementById("selectedDetailsSubtitle");
+
+      if (!selectedShooterId) {
+        container.innerHTML = "<p class='small'>No shooter selected.</p>";
+        subtitle.textContent = "Pick a shooter by clicking on them in the leaderboard.";
+        return;
+      }
+
+      const shooter = shooters.find(s => s.id === selectedShooterId);
+      if (!shooter) {
+        container.innerHTML = "<p class='small'>Shooter not found.</p>";
+        subtitle.textContent = "";
+        return;
+      }
+
+      const rank = getRankForXP(shooter.xp);
+      const nextRankIndex = RANKS.findIndex(r => r.name === rank.name) + 1;
+      const nextRank = RANKS[nextRankIndex] || null;
+      const currentMinXP = rank.minXP;
+      const nextMinXP = nextRank ? nextRank.minXP : currentMinXP + 1000;
+      const spanXP = nextMinXP - currentMinXP;
+      const progressXP = shooter.xp - currentMinXP;
+      const pct = Math.max(0, Math.min(100, (progressXP / spanXP) * 100));
+
+      subtitle.textContent = `${shooter.name} • ${rank.name}`;
+
+      const followers = shooter.followers || [];
+      const following = follows[shooter.id] || [];
+      const isCurrentUser = shooter.id === currentUserId;
+      const isFollowingUser = currentUserId && isFollowing(currentUserId, shooter.id);
+
+      let html = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div class="follow-stats">
+            <div class="follow-stat" onclick="showFollowers('${shooter.id}')">
+              <strong>${followers.length}</strong>
+              <span>Followers</span>
+            </div>
+            <div class="follow-stat" onclick="showFollowing('${shooter.id}')">
+              <strong>${following.length}</strong>
+              <span>Following</span>
+            </div>
+          </div>
+      `;
+      
+      if (currentUserId && !isCurrentUser) {
+        html += `
+          <button class="${isFollowingUser ? 'btn-following' : 'btn-follow'}" onclick="toggleFollow('${shooter.id}')">
+            ${isFollowingUser ? 'Following' : 'Follow'}
+          </button>
+        `;
+      }
+      
+      html += `</div>
+        <p class="small">
+          Total XP: <strong>${shooter.xp}</strong><br/>
+          Current Rank: <strong>${rank.name}</strong>
+      `;
+      if (nextRank) {
+        html += `<br/>XP to ${nextRank.name}: <strong>${Math.max(0, nextMinXP - shooter.xp)}</strong>`;
+      } else {
+        html += `<br/><strong>Max rank reached!</strong>`;
+      }
+      html += `</p>
+        <div class="xp-bar">
+          <div class="xp-fill" style="width:${pct}%;"></div>
+        </div>
+        <p class="small" style="margin-top:4px;">
+          Rank XP range: ${currentMinXP} – ${nextMinXP} (${pct.toFixed(1)}% progress)
+        </p>
+      `;
+
+      if (shooter.sessions.length === 0) {
+        html += `<p class="small">No sessions logged yet.</p>`;
+      } else {
+        html += `<h3 style="margin-top:12px;">Recent Sessions</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Drill</th>
+                <th>Hits/Shots</th>
+                <th>XP</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+        const recent = [...shooter.sessions].sort((a, b) => b.timestamp - a.timestamp).slice(0, 5);
+        recent.forEach(sess => {
+          const drill = getDrillById(sess.drillId);
+          const date = new Date(sess.timestamp).toLocaleString();
+          html += `
+            <tr>
+              <td>${date}</td>
+              <td>${drill ? drill.name : sess.drillId}</td>
+              <td>${sess.hits}/${sess.shots}</td>
+              <td>${sess.xpEarned}</td>
+            </tr>
+          `;
+        });
+        html += `</tbody></table>`;
+      }
+
+      container.innerHTML = html;
+    }
+
+    function renderCurrentUser() {
+      const container = document.getElementById("currentUserContent");
+      const msg = document.getElementById("currentUserMsg");
+      
+      if (!currentUserId) {
+        container.innerHTML = "";
+        msg.textContent = "Select a shooter and click 'Set as Current User' to enable following features.";
+        return;
+      }
+      
+      const currentUser = shooters.find(s => s.id === currentUserId);
+      if (!currentUser) {
+        currentUserId = null;
+        localStorage.removeItem(CURRENT_USER_KEY);
+        renderCurrentUser();
+        return;
+      }
+      
+      const following = follows[currentUserId] || [];
+      const followers = currentUser.followers || [];
+      
+      container.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div>
+            <strong style="font-size: 18px;">${currentUser.name}</strong>
+            <span class="current-user-badge">Current User</span>
+          </div>
+          <button class="btn-secondary" onclick="clearCurrentUser()">Change User</button>
+        </div>
+        <div class="follow-stats">
+          <div class="follow-stat" onclick="showFollowers('${currentUserId}')">
+            <strong>${followers.length}</strong>
+            <span>Followers</span>
+          </div>
+          <div class="follow-stat" onclick="showFollowing('${currentUserId}')">
+            <strong>${following.length}</strong>
+            <span>Following</span>
+          </div>
+        </div>
+        <p class="small" style="margin-top: 8px;">
+          Rank: <strong>${getRankForXP(currentUser.xp).name}</strong> • 
+          XP: <strong>${currentUser.xp}</strong> • 
+          Sessions: <strong>${currentUser.sessions.length}</strong>
+        </p>
+      `;
+      msg.textContent = "";
+    }
+
+    function renderFeed() {
+      const container = document.getElementById("feedContent");
+      const subtitle = document.getElementById("feedSubtitle");
+      
+      if (!currentUserId) {
+        container.innerHTML = "<p class='small'>Set a current user to see your feed.</p>";
+        subtitle.textContent = "Activity from users you follow";
+        return;
+      }
+      
+      const following = follows[currentUserId] || [];
+      if (following.length === 0) {
+        container.innerHTML = "<p class='small'>You're not following anyone yet. Follow users from the leaderboard to see their activity here.</p>";
+        subtitle.textContent = "Activity from users you follow";
+        return;
+      }
+      
+      subtitle.textContent = `Activity from ${following.length} user${following.length === 1 ? '' : 's'} you follow`;
+      
+      // Collect all sessions from followed users
+      let feedItems = [];
+      following.forEach(userId => {
+        const user = shooters.find(s => s.id === userId);
+        if (user && user.sessions) {
+          user.sessions.forEach(session => {
+            feedItems.push({
+              userId: userId,
+              userName: user.name,
+              session: session,
+              timestamp: session.timestamp
+            });
+          });
+        }
+      });
+      
+      // Sort by timestamp (newest first)
+      feedItems.sort((a, b) => b.timestamp - a.timestamp);
+      
+      if (feedItems.length === 0) {
+        container.innerHTML = "<p class='small'>No activity from followed users yet.</p>";
+        return;
+      }
+      
+      // Show last 20 items
+      feedItems = feedItems.slice(0, 20);
+      
+      let html = "";
+      feedItems.forEach(item => {
+        const drill = getDrillById(item.session.drillId);
+        const date = new Date(item.timestamp);
+        const timeAgo = getTimeAgo(date);
+        
+        html += `
+          <div class="feed-item">
+            <div class="feed-item-header">
+              <span class="feed-item-user">${item.userName}</span>
+              <span class="feed-item-time">${timeAgo}</span>
+            </div>
+            <p class="small" style="margin: 0;">
+              Completed <strong>${drill ? drill.name : item.session.drillId}</strong> • 
+              ${item.session.hits}/${item.session.shots} hits • 
+              <strong>+${item.session.xpEarned} XP</strong>
+            </p>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+    }
+
+    function getTimeAgo(date) {
+      const now = Date.now();
+      const diff = now - date.getTime();
+      const seconds = Math.floor(diff / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const hours = Math.floor(minutes / 60);
+      const days = Math.floor(hours / 24);
+      
+      if (days > 0) return `${days}d ago`;
+      if (hours > 0) return `${hours}h ago`;
+      if (minutes > 0) return `${minutes}m ago`;
+      return "Just now";
+    }
+
+    function showFollowers(userId) {
+      const user = shooters.find(s => s.id === userId);
+      if (!user) return;
+      
+      const followers = user.followers || [];
+      if (followers.length === 0) {
+        alert(`${user.name} has no followers yet.`);
+        return;
+      }
+      
+      const followerNames = followers.map(id => {
+        const f = shooters.find(s => s.id === id);
+        return f ? f.name : "Unknown";
+      }).join(", ");
+      
+      alert(`Followers of ${user.name}:\n\n${followerNames}`);
+    }
+
+    function showFollowing(userId) {
+      const following = follows[userId] || [];
+      const user = shooters.find(s => s.id === userId);
+      const userName = user ? user.name : "This user";
+      
+      if (following.length === 0) {
+        alert(`${userName} is not following anyone yet.`);
+        return;
+      }
+      
+      const followingNames = following.map(id => {
+        const f = shooters.find(s => s.id === id);
+        return f ? f.name : "Unknown";
+      }).join(", ");
+      
+      alert(`${userName} is following:\n\n${followingNames}`);
+    }
+
+    function clearCurrentUser() {
+      if (confirm("Change current user? You'll need to select a new one.")) {
+        currentUserId = null;
+        localStorage.removeItem(CURRENT_USER_KEY);
+        saveData();
+        renderCurrentUser();
+        renderLeaderboard();
+        renderFeed();
+      }
+    }
+
+    // ---- Event Handlers ----
+    function handleAddShooter() {
+      const input = document.getElementById("shooterName");
+      const msg = document.getElementById("addShooterMsg");
+      const name = input.value.trim();
+      if (!name) {
+        msg.textContent = "Enter a valid name.";
+        return;
+      }
+      const existing = shooters.find(s => s.name.toLowerCase() === name.toLowerCase());
+      if (existing) {
+        msg.textContent = "That shooter already exists.";
+        return;
+      }
+      const shooter = {
+        id: createId(),
+        name,
+        xp: 0,
+        sessions: [],
+        following: [],
+        followers: [],
+      };
+      shooters.push(shooter);
+      input.value = "";
+      msg.textContent = `Shooter "${name}" added.`;
+      selectedShooterId = shooter.id;
+      saveData();
+      renderShooterSelect();
+      renderLeaderboard();
+      renderSelectedShooter();
+      renderFeed();
+    }
+
+    function handleDrillChange() {
+      const drillId = document.getElementById("drillSelect").value;
+      const drill = getDrillById(drillId);
+      if (drill) {
+        document.getElementById("shots").value = drill.defaultShots;
+      }
+    }
+
+    function handleLogSession() {
+      const shooterSelect = document.getElementById("shooterSelect");
+      const drillSelect = document.getElementById("drillSelect");
+      const shotsInput = document.getElementById("shots");
+      const hitsInput = document.getElementById("hits");
+      const msg = document.getElementById("logSessionMsg");
+
+      const shooterId = shooterSelect.value;
+      const drillId = drillSelect.value;
+      const shots = Number(shotsInput.value);
+      const hits = Number(hitsInput.value);
+
+      if (!shooterId) {
+        msg.textContent = "Add a shooter first.";
+        return;
+      }
+      if (!drillId) {
+        msg.textContent = "Select a drill.";
+        return;
+      }
+      if (!shots || shots <= 0) {
+        msg.textContent = "Enter a valid number of shots.";
+        return;
+      }
+      if (hits < 0 || hits > shots) {
+        msg.textContent = "Hits must be between 0 and shots taken.";
+        return;
+      }
+
+      const xpEarned = calculateXP(drillId, hits, shots);
+      const shooter = shooters.find(s => s.id === shooterId);
+      if (!shooter) {
+        msg.textContent = "Shooter not found.";
+        return;
+      }
+
+      shooter.xp += xpEarned;
+      shooter.sessions.push({
+        drillId,
+        shots,
+        hits,
+        xpEarned,
+        timestamp: Date.now(),
+      });
+
+      selectedShooterId = shooterId;
+      saveData();
+      renderLeaderboard();
+      renderSelectedShooter();
+      renderFeed();
+
+      msg.textContent = `Session logged: +${xpEarned} XP.`;
+      hitsInput.value = "";
+    }
+
+    function handleSetCurrentUser() {
+      if (!selectedShooterId) {
+        alert("Please select a shooter first by clicking on them in the leaderboard.");
+        return;
+      }
+      currentUserId = selectedShooterId;
+      saveData();
+      renderCurrentUser();
+      renderLeaderboard();
+      renderSelectedShooter();
+      renderFeed();
+    }
+
+    function handleResetData() {
+      if (!confirm("Reset all shooters and sessions? This cannot be undone.")) return;
+      shooters = [];
+      selectedShooterId = null;
+      currentUserId = null;
+      follows = {};
+      saveData();
+      renderShooterSelect();
+      renderLeaderboard();
+      renderSelectedShooter();
+      renderCurrentUser();
+      renderFeed();
+      document.getElementById("addShooterMsg").textContent = "";
+      document.getElementById("logSessionMsg").textContent = "";
+    }
+
+    // ---- Init ----
+    function init() {
+      loadData();
+      renderDrillSelect();
+      renderShooterSelect();
+      renderLeaderboard();
+      renderSelectedShooter();
+      renderCurrentUser();
+      renderFeed();
+
+      document.getElementById("addShooterBtn").onclick = handleAddShooter;
+      document.getElementById("logSessionBtn").onclick = handleLogSession;
+      document.getElementById("resetDataBtn").onclick = handleResetData;
+      document.getElementById("setCurrentUserBtn").onclick = handleSetCurrentUser;
+      document.getElementById("drillSelect").onchange = handleDrillChange;
+    }
+
+    // Make functions available globally for onclick handlers
+    window.toggleFollow = toggleFollow;
+    window.showFollowers = showFollowers;
+    window.showFollowing = showFollowing;
+    window.clearCurrentUser = clearCurrentUser;
+
+    init();
+  </script>
+</body>
+</html>
